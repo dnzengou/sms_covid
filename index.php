@@ -1,122 +1,55 @@
 <?php
-// Reads the variables sent via POST
-$sessionId   = $_POST["sessionId"];
-$serviceCode = $_POST["serviceCode"];
+        #We obtain the data which is contained in the post url on our server.
+
+        // Reads the variables sent via POST
+        $text=$_GET['USSD_STRING']; // This is what will be saved by the user's entry, USSD_STRING=<name*ward_name*time>
+        $sessionId   = $_POST["sessionId"]; // Generates a unique value when the session starts and sent every time a mobile subscriber response has been received. 
+        $phonenumber=$_GET['MSISDN']; // We choose fot testing purpose MSISDN=0713038301
+        $serviceCode=$_GET['serviceCode']; // Refers to your USSD code, for which we choose for testing purpose serviceCode=*144#
 
 
-//This is the first menu screen
+        //$level = explode("*", $text);
+        //This is the first menu screen
+        if (isset($text)) {
+            // https://<app_url>/?MSISDN=0713038301&USSD_STRING=&serviceCode=*144#
+   
 
-if ( $text == "" ) {
-  $response  = "CON Hi welcome, I can help you with Event Reservation \n";
-  $response .= "1. Enter 1 to continue";
-}
+        if ( $text == "" ) {
+            $response="CON Hi welcome, I can help you with COVID-19 related care options \n";
+            // CON means an intermediate menu Or that the session is CONtinuing
+            $response .= "1. Testing. Please enter you name"; // Holds the answer to the user input
+        }
+        // https://<app_url>/?MSISDN=0713038301&USSD_STRING=Desire&serviceCode=*144#
 
+        if(isset($level[0]) && $level[0]!="" && !isset($level[1])){
 
-// Menu for a user who selects '1' from the first menu
-// Will be brought to this second menu screen
+          $response="CON Hi ".$level[0].", enter your ward name";
+             
+        }
+        // https://<app_url>/?MSISDN=0713038301&USSD_STRING=Desire*Kigali&serviceCode=*144#
+        else if(isset($level[1]) && $level[1]!="" && !isset($level[2])){
+                $response="CON Please ".$level[0].", enter the time of your preference\n"; 
+                $response .= "We will come to ".$level[1]." for testing";
 
-else if ($text == "1") {
-  $response  = "CON  Pick a table for reservation below \n";
-  $response .= "1. Table for 2 \n";
-  $response .= "2. Table for 4 \n";
-  $response .= "3. Table for 6 \n";
-  $response .= "4. Table for 8 \n";
-}
+        }
+        // https://<app_url>/?MSISDN=0713038301&USSD_STRING=Desire*Kigali*13&serviceCode=*144#
+        else if(isset($level[2]) && $level[2]!="" && !isset($level[3])){
+            //Save data to database
+            $data=array(
+                'phonenumber'=>$phonenumber,
+                'name' =>$level[0],
+                'ward' => $level[1],
+                'time'=>$level[2]
+                );
 
-
-//Menu for a user who selects '1' from the second menu above
-// Will be brought to this third menu screen
-else if ($text == "1*1") {
-  $response = "CON You are about to book a table for 2 \n";
-  $response .= "Please Enter 1 to confirm \n";
-}
-
-else if ($text == "1*1*1") {
-  $response = "CON Table for 2 cost -N- 50,000.00 \n";
-  $response .= "Enter 1 to continue \n";
-  $response .= "Enter 0 to cancel";
-}
-
-else if ($text == "1*1*1*1") {
-  $response = "END Your Table reservation for 2 has been booked";
-}
-
-
-else if ($text == "1*1*1*0") {
-  $response = "END Your Table reservation for 2 has been canceled";
-}
-
-// Menu for a user who selects "2" from the second menu above
-// Will be brought to this fourth menu screen
-else if ($text == "1*2") {
-  $response = "CON You are about to book a table for 4 \n";
-  $response .= "Please Enter 1 to confirm \n";
-}
-
-// Menu for a user who selects "1" from the fourth menu screen
-else if ($text == "1*2*1") {
-  $response = "CON Table for 4 cost -N- 150,000.00 \n";
-  $response .= "Enter 1 to continue \n";
-  $response .= "Enter 0 to cancel";
-}
-        
-else if ($text == "1*2*1*1") {
-  $response = "END Your Table reservation for 4 has been booked";
-}
-    
-else if ($text == "1*2*1*0") {
-  $response = "END Your Table reservation for 4 has been canceled";
-}
-
-// Menu for a user who enters "3" from the second menu above
-// Will be brought to this fifth menu screen
-else if ($text == "1*3") {
-  $response = "CON You are about to book a table for 6 \n";
-  $response .= "Please Enter 1 to confirm \n";
-}
-
-// Menu for a user who enters "1" from the fifth menu
-else if ($text == "1*3*1") {
-  $response = "CON Table for 6 cost -N- 250,000.00 \n";
-  $response .= "Enter 1 to continue \n";
-  $response .= "Enter 0 to cancel";
-}
-
-else if ($text == "1*3*1*1") {
-  $response = "END Your Table reservation for 6 has been booked";
-}
-        
-else if ($text == "1*3*1*0") {
-  $response = "END Your Table reservation for 6 has been canceled";
-}
-
-// Menu for a user who enters "4" from the second menu above
-// Will be brought to this sixth menu screen
-else if ($text == "1*4") {
-  $response = "CON You are about to book a table for 8 \n";
-  $response .= "Please Enter 1 to confirm \n";
-}
-
-// Menu for a user who enters "1" from the sixth menu
-else if ($text == "1*4*1") {
-  $response = "CON Table for 8 cost -N- 250,000.00 \n";
-  $response .= "Enter 1 to continue \n";
-  $response .= "Enter 0 to cancel";
-}
-                       
-else if ($text == "1*4*1*1") {
-  $response = "END Your Table reservation for 8 has been booked";
-}
             
-else if ($text == "1*4*1*0") {
-  $response = "END Your Table reservation for 8 has been canceled";
-}
+            // https://<app_url>/?MSISDN=0713038301&USSD_STRING=john%20doe*Kigali*13&serviceCode=*144
+            $response="END Thank you ".$level[0]." for scheduling testing appointment.\nWe will get back to you when confirmation"; 
+    }
 
+        header('Content-type: text/plain');
+        echo $response;
 
-//echo response
-
-header('Content-type: text/plain');
-echo $response
-
+    }
 
 ?>
